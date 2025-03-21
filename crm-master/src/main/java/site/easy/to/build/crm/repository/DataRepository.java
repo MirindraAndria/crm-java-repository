@@ -13,6 +13,7 @@ public class DataRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
     public void clearDatabase(Set<String> tablesToExclude) {
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0;");
         List<String> tables = jdbcTemplate.queryForList("SHOW TABLES;", String.class);
         for (String table : tables) {
             if (!tablesToExclude.contains(table)) {
