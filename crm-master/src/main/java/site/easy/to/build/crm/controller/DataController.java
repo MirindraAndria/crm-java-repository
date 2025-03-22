@@ -12,7 +12,7 @@ public class DataController {
     @Autowired
     private DataService dataService ;
 
-    @PostMapping("/action")
+    @PostMapping("/manager/action")
     public String action() {
         dataService.clearDatabase(); 
         return "redirect:/";  
