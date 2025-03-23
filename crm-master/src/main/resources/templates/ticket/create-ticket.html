@@ -19,6 +19,43 @@
 <![endif]-->
 </head>
 
+
+<div id="budgetExceededModal" class="modal" tabindex="-1" role="dialog" th:attr="style=${popUp} ? 'display:block' : 'display:none'">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Alerte dépassement</h5>
+            </div>
+            <div class="modal-body">
+                <div th:if="${depassement != null}" th:text="${depassement}"></div>
+            </div>
+            <div class="modal-footer">
+                <form th:action="@{/employee/ticket/annuler}" method="post">
+                    <button type="submit" class="btn btn-secondary">Annuler</button>
+                </form>
+                <form th:action="@{/employee/ticket/confirmer}" method="post">
+                    <button type="submit" class="btn btn-primary">Confirmer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() { 
+        var showModal = [[${popUp}]] ? true : false;
+
+        if (showModal) { 
+            $('#budgetExceededModal').modal('show'); 
+        }
+
+        $("#confirmExpense, #cancelButton").click(function() {  
+            $('#budgetExceededModal').modal("hide");
+        });
+    });
+</script>
+
+
 <body class="skin-blue fixed-layout">
 <!-- ============================================================== -->
 <!-- Preloader - style you can find in spinners.css -->
@@ -71,7 +108,11 @@
                         <div class="card-body">
                             <h4 class="card-title">Create New Ticket</h4>
                             <form th:object="${ticket}" th:action="@{/employee/ticket/create-ticket}" method="post">
-
+                                <label class="m-t-20" for="name">amount :</label>
+                                <div class="input-group">
+                                    <input type="number" id="amount" name="amount" class="form-control">
+                                </div>
+                        
                                 <label class="m-t-20" for="subject">Subject:</label>
                                 <div class="input-group">
                                     <input type="text" id="subject" th:field="*{subject}" class="form-control">

@@ -39,7 +39,6 @@ public class UserProfileController {
         model.addAttribute("profile",profile);
         return "profile";
     }
-
     @PostMapping("/update")
     public String updateUser(@ModelAttribute("profile") UserProfile profile, Authentication authentication) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);

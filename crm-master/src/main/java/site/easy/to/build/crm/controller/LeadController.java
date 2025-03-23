@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -25,6 +27,11 @@ import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.calendar.GoogleCalendarApiService;
 import site.easy.to.build.crm.google.service.drive.GoogleDriveApiService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.model.Budget;
+import site.easy.to.build.crm.model.DepenseTicketLead;
+import site.easy.to.build.crm.service.BudgetService;
+import site.easy.to.build.crm.service.DepenseTicketLeadService;
+import site.easy.to.build.crm.service.TauxService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.drive.GoogleDriveFileService;
 import site.easy.to.build.crm.service.file.FileService;
@@ -42,6 +49,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat; 
 
 @Controller
 @RequestMapping("/employee/lead")
@@ -60,6 +69,12 @@ public class LeadController {
     private final LeadEmailSettingsService leadEmailSettingsService;
     private final GoogleGmailApiService googleGmailApiService;
     private final EntityManager entityManager;
+    @Autowired 
+    DepenseTicketLeadService depenseTicketLeadService; 
+    @Autowired  
+    TauxService tauxService ; 
+    @Autowired  
+    BudgetService budgetService; 
 
     @Autowired
     public LeadController(LeadService leadService, AuthenticationUtils authenticationUtils, UserService userService, CustomerService customerService,
@@ -124,10 +139,11 @@ public class LeadController {
     }
 
     @GetMapping("/assigned-leads")
-    public String showAssignedEmployeeLeads(Authentication authentication, Model model) {
+    public String showAssignedEmployeeLeads(Authentication authentication, Model model , @RequestParam(value = "alert", required = false) String alert) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         List<Lead> leads = leadService.findAssignedLeads(userId);
         model.addAttribute("leads", leads);
+        model.addAttribute("alert" , alert) ;
         return "lead/show-my-leads";
     }
 
@@ -168,7 +184,7 @@ public class LeadController {
     public String createLead(@ModelAttribute("lead") @Validated Lead lead, BindingResult bindingResult,
                              @RequestParam("customerId") int customerId, @RequestParam("employeeId") int employeeId,
                              Authentication authentication, @RequestParam("allFiles")@Nullable String files,
-                             @RequestParam("folderId") @Nullable String folderId, Model model) throws JsonProcessingException {
+                             @RequestParam("folderId") @Nullable String folderId, @RequestParam("amount") double amount ,  Model model , HttpSession session ) throws JsonProcessingException {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -207,21 +223,44 @@ public class LeadController {
                 return "error/500";
             }
         }
-
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        List<DepenseTicketLead> allDepense = depenseTicketLeadService.getAllDepenseTicketLead( customerId) ; 
+        List<Budget> allBudget = budgetService.getAll( customerId) ; 
+        double taux_percent = tauxService.getTauxAlert().getTaux(); 
+        String alert =  tauxService.checkTauxAlert(taux_percent , allBudget , allDepense , amount);
+        String depassement = tauxService.checkDepassement(allBudget, allDepense, taux_percent) ; 
+        DepenseTicketLead depense = new DepenseTicketLead("new depense lead", timestamp ,  amount, 0  , lead.getLeadId()); 
+        double sommeBudget = 0 ; 
+        for ( Budget budget : allBudget) { sommeBudget += budget.getAmount() ; }
+        double newAmount = sommeBudget - amount ; 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        
+        String formattedDate = sdf.format( timestamp ); ; 
+        budgetService.updateBudget(customerId, "new budget", newAmount ,  formattedDate);
+        if ( depassement != null ) { 
+            session.setAttribute("lead", lead ) ;
+            session.setAttribute("depense", depense );
+            model.addAttribute("popUp", true) ; 
+            model.addAttribute( "depassement", depassement ) ; 
+            return "lead/create-lead" ; 
+        }
         Lead createdLead = leadService.save(lead);
-        fileUtil.saveFiles(allFiles, createdLead);
+        
+      
+       
+        depenseTicketLeadService.insertDepenseLead("new depense lead", timestamp, amount, lead.getLeadId());
 
+        fileUtil.saveFiles(allFiles, createdLead);
         if (lead.getGoogleDrive() != null) {
             fileUtil.saveGoogleDriveFiles(authentication, allFiles, folderId, createdLead);
         }
-
         if (lead.getStatus().equals("meeting-to-schedule")) {
-            return "redirect:/employee/calendar/create-event?leadId=" + lead.getLeadId();
+            return "redirect:/employee/lead/assigned-leads?alert=" + alert;
         }
         if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
-            return "redirect:/employee/lead/created-leads";
+            return "redirect:/employee/lead/assigned-leads?alert=" + alert;
         }
-        return "redirect:/employee/lead/assigned-leads";
+        return "redirect:/employee/lead/assigned-leads?alert=" + alert;
     }
 
     @GetMapping("/update/{id}")
@@ -612,4 +651,19 @@ public class LeadController {
         model.addAttribute("folders", folders);
         model.addAttribute("hasGoogleDriveAccess", hasGoogleDriveAccess);
     }
+
+    @PostMapping("/annuler")
+    public String annulerLead() {
+        return "redirect:/employee/lead/create" ; 
+    }
+    @PostMapping("/confirmer")
+    public String comfirmerTicket(HttpSession session ) {
+        Lead lead = (Lead) session.getAttribute("lead") ; 
+        System.out.println( "name lead " + lead.getName()  +"\n") ; 
+        leadService.save(lead) ;  
+        DepenseTicketLead  depenseTicketLead = (DepenseTicketLead) session.getAttribute("depense") ; 
+        depenseTicketLeadService.insertDepenseLead(depenseTicketLead.getLibelle(), depenseTicketLead.getDateDepense() ,  depenseTicketLead.getAmount(), lead.getLeadId());
+        return "redirect:/employee/lead/create" ; 
+    }
+    
 }
