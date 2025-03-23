@@ -31,10 +31,18 @@
             <!-- ============================================================== -->
             <!-- User profile and search -->
             <!-- ============================================================== -->
-          
+            <ul class="navbar-nav my-lg-1">
                 <form th:action="@{/manager/action}" method="post">
-                    <button type="submit" class="btn btn-danger btn-sm rounded-pill">Reset data</button>
+                    <button type="submit" class="btn btn-danger btn-sm rounded-pill mx-3">Reset data</button>
                 </form> 
+            </ul>
+            
+            <ul class="navbar-nav my-lg-1">
+                <form th:action="@{/addBudget}" method="get">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill mx-3">Add budget</button>
+                </form> 
+            </ul>
+            
            
 
             <ul class="navbar-nav my-lg-0">

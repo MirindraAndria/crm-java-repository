@@ -1,6 +1,8 @@
 package site.easy.to.build.crm.controller;
 
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -15,6 +17,11 @@ import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.entity.settings.TicketEmailSettings;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.model.Budget;
+import site.easy.to.build.crm.model.DepenseTicketLead;
+import site.easy.to.build.crm.service.BudgetService;
+import site.easy.to.build.crm.service.DepenseTicketLeadService;
+import site.easy.to.build.crm.service.TauxService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.settings.TicketEmailSettingsService;
 import site.easy.to.build.crm.service.ticket.TicketService;
@@ -24,11 +31,17 @@ import site.easy.to.build.crm.util.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.http.HttpClient;
 import java.security.GeneralSecurityException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @Controller
 @RequestMapping("/employee/ticket")
@@ -41,6 +54,12 @@ public class TicketController {
     private final TicketEmailSettingsService ticketEmailSettingsService;
     private final GoogleGmailApiService googleGmailApiService;
     private final EntityManager entityManager;
+    @Autowired 
+    DepenseTicketLeadService depenseTicketLeadService; 
+    @Autowired  
+    TauxService tauxService ; 
+    @Autowired  
+    BudgetService budgetService; 
 
 
     @Autowired
@@ -92,10 +111,11 @@ public class TicketController {
     }
 
     @GetMapping("/assigned-tickets")
-    public String showEmployeeTicket(Model model, Authentication authentication) {
+    public String showEmployeeTicket(Model model, Authentication authentication ,  @RequestParam(value = "alert", required = false) String alert ) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         List<Ticket> tickets = ticketService.findEmployeeTickets(userId);
         model.addAttribute("tickets",tickets);
+        model.addAttribute("alert", alert); 
         return "ticket/my-tickets";
     }
     @GetMapping("/create-ticket")
@@ -125,7 +145,8 @@ public class TicketController {
     @PostMapping("/create-ticket")
     public String createTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult, @RequestParam("customerId") int customerId,
                                @RequestParam Map<String, String> formParams, Model model,
-                               @RequestParam("employeeId") int employeeId, Authentication authentication) {
+                               @RequestParam("employeeId") int employeeId, Authentication authentication ,
+                               @RequestParam("amount") double amount  , HttpSession session ) {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -169,9 +190,33 @@ public class TicketController {
         ticket.setEmployee(employee);
         ticket.setCreatedAt(LocalDateTime.now());
 
-        ticketService.save(ticket);
+        List<DepenseTicketLead> allDepense = depenseTicketLeadService.getAllDepenseTicketLead( customerId) ; 
+        List<Budget> allBudget = budgetService.getAll( customerId) ; 
+        double taux_percent = tauxService.getTauxAlert().getTaux(); 
+        String alert =  tauxService.checkTauxAlert(taux_percent , allBudget , allDepense , amount);
+        String depassement = tauxService.checkDepassement(allBudget, allDepense, taux_percent) ; 
+        
+        double sommeBudget = 0 ; 
+        for ( Budget budget : allBudget) { sommeBudget += budget.getAmount() ; }
+        double newAmount = sommeBudget - amount ; 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+        String formattedDate = sdf.format( timestamp ); ; 
+        budgetService.updateBudget(customerId, "new budget", newAmount ,  formattedDate);
+        
+        DepenseTicketLead depense = new DepenseTicketLead("new depense ticket", timestamp ,  amount, ticket.getTicketId()  , 0); 
+        if ( depassement != null ) { 
+            session.setAttribute("ticket", ticket ) ;
+            session.setAttribute("depense", depense );
+            model.addAttribute("popUp", true) ; 
+            model.addAttribute( "depassement", depassement ) ; 
+            return "ticket/create-ticket" ; 
+        }
 
-        return "redirect:/employee/ticket/assigned-tickets";
+        ticketService.save(ticket);
+        depenseTicketLeadService.insertDepenseTicket("new depense lead", timestamp, amount, ticket.getTicketId());
+
+        return "redirect:/employee/ticket/assigned-tickets?alert=" + alert ;
     }
 
     @GetMapping("/update-ticket/{id}")
@@ -373,4 +418,17 @@ public class TicketController {
             }
         }
     }
+    @PostMapping("/annuler")
+    public String annulertTicket() {
+        return "redirect:/employee/ticket/create-ticket" ; 
+    }
+    @PostMapping("/confirmer")
+    public String comfirmerTicket(HttpSession session ) {
+        Ticket ticket = (Ticket) session.getAttribute("ticket") ; 
+        ticketService.save(ticket) ;  
+        DepenseTicketLead  depenseTicketLead = (DepenseTicketLead) session.getAttribute("depense") ; 
+        depenseTicketLeadService.insertDepenseTicket(depenseTicketLead.getLibelle(), depenseTicketLead.getDateDepense() ,  depenseTicketLead.getAmount(), ticket.getTicketId());
+        return "redirect:/employee/ticket/create-ticket" ; 
+    }
+    
 }
