@@ -14,8 +14,14 @@ public class DepenseTicketLeadService {
     @Autowired
     DepenseTicketLeadRepository depenseTicketLeadRepository ; 
 
-    public List<DepenseTicketLead> getAllDepenseTicketLead(  int idCustomer  ) {
-        return depenseTicketLeadRepository.getByIdCustomer( idCustomer );   
+    public List<DepenseTicketLead> getAllDepenseTicket(  int idCustomer  ) {
+        return depenseTicketLeadRepository.getByIdCustomerTicket( idCustomer );   
+    }
+    public List<DepenseTicketLead> getAllDepenseLead(  int idCustomer  ) {
+        return depenseTicketLeadRepository.getByIdCustomerLead( idCustomer );   
+    }
+    public List<DepenseTicketLead> getAll( ) {
+        return depenseTicketLeadRepository.getAll();   
     }
     public void insertDepenseLead( String libelle , Timestamp date_depense , double amount , int idLead ) {
         DepenseTicketLead depense = new DepenseTicketLead(libelle, date_depense, amount, 0 , idLead); 
@@ -24,5 +30,18 @@ public class DepenseTicketLeadService {
     public void insertDepenseTicket( String libelle , Timestamp date_depense , double amount , int idTicket ) {
         DepenseTicketLead depense = new DepenseTicketLead(libelle, date_depense, amount, idTicket , 0); 
         depenseTicketLeadRepository.insertDepenseTicket(depense); 
+    }
+    public void deleteTicket ( int idTicket ) { 
+        depenseTicketLeadRepository.deleteDepenseTicket(idTicket);
+    }
+    public void deleteLead( int idLead ) { 
+        depenseTicketLeadRepository.deleteDepenseLead(idLead);
+    }
+
+    public void updateTicket ( int idTicket , double amount  ) { 
+        depenseTicketLeadRepository.updateDepenseTicket(amount, idTicket);
+    }
+    public void updateLead ( int idLead , double amount  ) { 
+        depenseTicketLeadRepository.updateDepenseLead(amount, idLead);
     }
 }

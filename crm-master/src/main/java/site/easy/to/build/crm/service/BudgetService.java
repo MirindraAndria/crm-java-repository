@@ -42,5 +42,8 @@ public class BudgetService {
     public List<Budget> getAll( int idCustomer ){
         return budgetRepository.getByIdCustomer(idCustomer) ; 
     }
+    public List<Budget> getAll(){
+        return budgetRepository.getAll() ; 
+    }
     
 }

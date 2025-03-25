@@ -224,11 +224,12 @@ public class LeadController {
             }
         }
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        List<DepenseTicketLead> allDepense = depenseTicketLeadService.getAllDepenseTicketLead( customerId) ; 
+        List<DepenseTicketLead> allDepenseLead = depenseTicketLeadService.getAllDepenseLead( customerId) ; 
+        List<DepenseTicketLead> allDepenseTicket = depenseTicketLeadService.getAllDepenseTicket( customerId) ; 
         List<Budget> allBudget = budgetService.getAll( customerId) ; 
         double taux_percent = tauxService.getTauxAlert().getTaux(); 
-        String alert =  tauxService.checkTauxAlert(taux_percent , allBudget , allDepense , amount);
-        String depassement = tauxService.checkDepassement(allBudget, allDepense, taux_percent) ; 
+        String alert =  tauxService.checkTauxAlert(taux_percent , allBudget , allDepenseLead, allDepenseTicket , amount);
+        String depassement = tauxService.checkDepassement(allBudget, allDepenseLead,allDepenseTicket ,  taux_percent) ; 
         DepenseTicketLead depense = new DepenseTicketLead("new depense lead", timestamp ,  amount, 0  , lead.getLeadId()); 
         double sommeBudget = 0 ; 
         for ( Budget budget : allBudget) { sommeBudget += budget.getAmount() ; }
@@ -236,7 +237,7 @@ public class LeadController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         
         String formattedDate = sdf.format( timestamp ); ; 
-        budgetService.updateBudget(customerId, "new budget", newAmount ,  formattedDate);
+        //budgetService.updateBudget(customerId, "new budget", newAmount ,  formattedDate);
         if ( depassement != null ) { 
             session.setAttribute("lead", lead ) ;
             session.setAttribute("depense", depense );
@@ -245,9 +246,6 @@ public class LeadController {
             return "lead/create-lead" ; 
         }
         Lead createdLead = leadService.save(lead);
-        
-      
-       
         depenseTicketLeadService.insertDepenseLead("new depense lead", timestamp, amount, lead.getLeadId());
 
         fileUtil.saveFiles(allFiles, createdLead);

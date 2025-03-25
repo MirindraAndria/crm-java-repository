@@ -47,7 +47,10 @@ public class TauxAlertRepository {
             }
         });
     }
-    
+    public int updateTaux(double taux) {
+        String sql = "UPDATE taux_alert SET taux = ? ";
+        return jdbcTemplate.update(sql, taux);
+    }
 
     // Fonction pour mettre à jour un taux d'alerte par son ID
     public int updateTaux(int idTaux, double taux) {

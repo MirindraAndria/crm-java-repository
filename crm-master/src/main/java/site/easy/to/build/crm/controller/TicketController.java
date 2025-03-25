@@ -190,11 +190,12 @@ public class TicketController {
         ticket.setEmployee(employee);
         ticket.setCreatedAt(LocalDateTime.now());
 
-        List<DepenseTicketLead> allDepense = depenseTicketLeadService.getAllDepenseTicketLead( customerId) ; 
+        List<DepenseTicketLead> allDepenseTicket = depenseTicketLeadService.getAllDepenseTicket( customerId) ; 
+        List<DepenseTicketLead> allDepenseLead = depenseTicketLeadService.getAllDepenseLead( customerId) ; 
         List<Budget> allBudget = budgetService.getAll( customerId) ; 
         double taux_percent = tauxService.getTauxAlert().getTaux(); 
-        String alert =  tauxService.checkTauxAlert(taux_percent , allBudget , allDepense , amount);
-        String depassement = tauxService.checkDepassement(allBudget, allDepense, taux_percent) ; 
+        String alert =  tauxService.checkTauxAlert(taux_percent , allBudget , allDepenseLead, allDepenseTicket , amount);
+        String depassement = tauxService.checkDepassement(allBudget, allDepenseLead, allDepenseTicket ,taux_percent) ; 
         
         double sommeBudget = 0 ; 
         for ( Budget budget : allBudget) { sommeBudget += budget.getAmount() ; }
@@ -202,7 +203,7 @@ public class TicketController {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String formattedDate = sdf.format( timestamp ); ; 
-        budgetService.updateBudget(customerId, "new budget", newAmount ,  formattedDate);
+        //budgetService.updateBudget(customerId, "new budget", newAmount ,  formattedDate);
         
         DepenseTicketLead depense = new DepenseTicketLead("new depense ticket", timestamp ,  amount, ticket.getTicketId()  , 0); 
         if ( depassement != null ) { 
