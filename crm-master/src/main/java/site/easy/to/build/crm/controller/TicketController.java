@@ -39,8 +39,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @Controller
@@ -60,6 +58,8 @@ public class TicketController {
     TauxService tauxService ; 
     @Autowired  
     BudgetService budgetService; 
+  
+
 
 
     @Autowired
@@ -213,9 +213,8 @@ public class TicketController {
             model.addAttribute( "depassement", depassement ) ; 
             return "ticket/create-ticket" ; 
         }
-
         ticketService.save(ticket);
-        depenseTicketLeadService.insertDepenseTicket("new depense lead", timestamp, amount, ticket.getTicketId());
+        depenseTicketLeadService.insertDepenseTicket("new depense ticket", timestamp, amount, ticket.getTicketId());
 
         return "redirect:/employee/ticket/assigned-tickets?alert=" + alert ;
     }
@@ -362,6 +361,7 @@ public class TicketController {
         }
 
         ticketService.delete(ticket);
+        depenseTicketLeadService.deleteTicket(ticket.getTicketId());
         return "redirect:/employee/ticket/assigned-tickets";
     }
 

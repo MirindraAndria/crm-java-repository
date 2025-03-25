@@ -41,6 +41,17 @@ public class Budget {
     public void setAmount(double amount) {
         this.amount = amount;
     }
+    public void setAmount(double amount , String line )throws Exception { 
+        this.amount = amount;
+        try {
+            if (amount < 0) {
+                throw new Exception("error line : " + line + " budget negtive : " + amount) ;
+            }
+            this.amount = amount;
+        } catch (NumberFormatException e) {
+            throw new Exception("error line : " + line + " invalide value budget: " + amount) ;
+        }
+    }
     public Timestamp getDateBudget() {
         return dateBudget;
     }
