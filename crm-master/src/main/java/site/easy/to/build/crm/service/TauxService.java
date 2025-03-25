@@ -24,13 +24,17 @@ public class TauxService {
         return tauxAlertRepository.getTaux() ;   
     } 
     
-    public String checkTauxAlert( double tauxAlertPercent  , List<Budget> budgetCustomer , List<DepenseTicketLead> allDepenseCustomer , double depenseActu ) {  
+    public String checkTauxAlert( double tauxAlertPercent  , List<Budget> budgetCustomer , List<DepenseTicketLead> allDepenseCustomerLead ,  List<DepenseTicketLead> allDepenseCustomerTicket , double depenseActu ) {  
         double sommeBudget = 0 ; 
         double sommeDepense = 0 ; 
         for ( Budget budget : budgetCustomer ) { sommeBudget += budget.getAmount() ; }
-        for ( DepenseTicketLead depense : allDepenseCustomer ) { sommeDepense += depense.getAmount() ; }
+        for ( DepenseTicketLead depense : allDepenseCustomerLead ) { sommeDepense += depense.getAmount() ; }
+        for ( DepenseTicketLead depense : allDepenseCustomerTicket ) { sommeDepense += depense.getAmount() ; }
+
         double sommeDepenseFinal = sommeDepense + depenseActu ;
+        sommeBudget = sommeBudget - sommeDepense ;
         double valueBudgetPercent = ( sommeBudget * tauxAlertPercent ) / 100 ;  
+        System.out.println("checkTauxAlert\n");
         System.out.println( "sommeBudget: " + sommeBudget ) ;
         System.out.println( "valueBudgetPercent: " + valueBudgetPercent) ; 
         System.out.println( "sommeDepenseFinal: " + sommeDepenseFinal ) ; 
@@ -40,16 +44,22 @@ public class TauxService {
     }
 
 
-    public String checkDepassement(List<Budget> budgetCustomer , List<DepenseTicketLead> allDepenseCustomer , double depenseActu){ 
+    public String checkDepassement(List<Budget> budgetCustomer , List<DepenseTicketLead> allDepenseCustomerLead , List<DepenseTicketLead> allDepenseCustomerTicket,  double depenseActu){ 
         double sommeBudget = 0 ; 
         double sommeDepense = 0 ; 
         for ( Budget budget : budgetCustomer ) { sommeBudget += budget.getAmount() ; }
-        for ( DepenseTicketLead depense : allDepenseCustomer ) { sommeDepense += depense.getAmount() ; }
+        for ( DepenseTicketLead depense : allDepenseCustomerLead ) { sommeDepense += depense.getAmount() ; }
+        for ( DepenseTicketLead depense : allDepenseCustomerTicket ) { sommeDepense += depense.getAmount() ; }
+        
         double sommeDepenseFinal= sommeDepense + depenseActu ;
-      
+        sommeBudget = sommeBudget - sommeDepense ; 
+        System.out.println("checkDepassement\n");
         System.out.println( "sommeBudget: " + sommeBudget ) ;
         System.out.println( "sommeDepense: " + sommeDepenseFinal ) ; 
         if( sommeDepenseFinal > sommeBudget ) { return "depassement du budget" ;  } 
         return null  ; 
+    }
+    public void updateTaux( double taux ) { 
+        tauxAlertRepository.updateTaux(taux) ; 
     }
 }

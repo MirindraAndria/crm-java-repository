@@ -9,7 +9,8 @@ public class DepenseTicketLead {
     double amount;
     int idTicket;
     int idLead;   
-    int idCustomer;      
+    int idCustomer; 
+    String customer;      
     
     public DepenseTicketLead() {}
 
@@ -31,6 +32,13 @@ public class DepenseTicketLead {
     }
 
     // Getters et Setters
+
+    public String getCustomer() {
+        return customer;
+    }
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
     public int getIdCustomer() {
         return idCustomer;
     }

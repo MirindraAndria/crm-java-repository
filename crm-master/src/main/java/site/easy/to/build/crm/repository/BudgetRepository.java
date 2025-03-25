@@ -16,11 +16,19 @@ public class BudgetRepository {
     }
     public void addBudget(Budget budget) {
         String sql = "INSERT INTO budget (libelle , date_budget , amount ,idCustomer ) VALUES (?,?,?,?)";
-        jdbcTemplate.update(sql, budget.getLibelle(), budget.getDateBudget(), budget.getAmount(), budget.getIdCustormer());
+        jdbcTemplate.update(sql, budget.getLibelle(), budget.getDateBudget(), budget.getAmount(), budget.getIdCustomer());
     }
     public void updateBudget(Budget budget) {
-        String sql = "UPDATE budget SET amount = ? WHERE idCustomer = ? ";
-        jdbcTemplate.update(sql, budget.getAmount(), budget.getIdCustormer());
+        String sql = """
+            UPDATE budget 
+            SET amount = ? 
+            WHERE idCustomer = ? 
+            AND date_budget = (
+                SELECT MAX(date_budget) FROM budget 
+                WHERE idCustomer = ?
+            )
+        """;
+        jdbcTemplate.update(sql, budget.getAmount(), budget.getIdCustomer(), budget.getIdCustomer());
     }
     
     public List<Budget> getByIdCustomer(int idCustomer) {  
@@ -32,6 +40,16 @@ public class BudgetRepository {
             rs.getDouble("amount"),
             rs.getInt("idCustomer")
         ), idCustomer);
+    }
+    public List<Budget> getAll() {  
+        String sql = "SELECT * FROM budget";  
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new Budget(
+            rs.getInt("idBudget"),
+            rs.getString("libelle"),
+            rs.getTimestamp("date_budget"),
+            rs.getDouble("amount"),
+            rs.getInt("idCustomer")
+        ));
     }
     
 }
