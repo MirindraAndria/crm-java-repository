@@ -31,6 +31,13 @@ public class DepenseTicketLeadService {
         DepenseTicketLead depense = new DepenseTicketLead(libelle, date_depense, amount, idTicket , 0); 
         depenseTicketLeadRepository.insertDepenseTicket(depense); 
     }
+    public void saveDepenseTicket( DepenseTicketLead depense ) { 
+        depenseTicketLeadRepository.insertDepenseTicket(depense); 
+    }
+    public void saveDepenseLead( DepenseTicketLead depense ) { 
+        depenseTicketLeadRepository.insertDepenseLead(depense); 
+    }
+    
     public void deleteTicket ( int idTicket ) { 
         depenseTicketLeadRepository.deleteDepenseTicket(idTicket);
     }

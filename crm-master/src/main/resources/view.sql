@@ -1,3 +1,4 @@
+
 CREATE OR REPLACE VIEW depenseTicketCustomer AS 
     SELECT 
     d.idDepense , 
@@ -21,3 +22,6 @@ CREATE OR REPLACE VIEW depenseLeadCustomer AS
     t.customer_id 
     FROM depenseTicketLead as d
     LEFT JOIN trigger_lead as t ON d.idLead = t.lead_id  ; 
+
+DROP VIEW depenseTicketCustomer ; 
+DROP VIEW depenseLeadCustomer ;  

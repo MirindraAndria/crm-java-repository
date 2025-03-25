@@ -71,7 +71,7 @@ public class apiController {
 
 
     @PostMapping("/delete-ticket-depense/{idTicket}") 
-    public ResponseEntity<String> deleteTicketDepense(@PathVariable int idTicket  ) {
+    public ResponseEntity<String> deleteTicketDepense(@PathVariable int idTicket) {
         try { 
             depenseService.deleteTicket(idTicket);
             return ResponseEntity.ok("delete ticket successful"); 
@@ -89,21 +89,21 @@ public class apiController {
     }
     
     @PostMapping("/update-lead/{idLead}/{amount}")
-    public ResponseEntity<String> updateLead(@PathVariable int idLead , @PathVariable double amount ) {
+    public ResponseEntity<String> updateLead(@PathVariable int idLead , @PathVariable String amount ) {
        try { 
-            depenseService.updateLead(idLead, amount);
+            depenseService.updateLead(idLead, Double.valueOf(amount));
             return ResponseEntity.ok("update lead successful"); 
        }catch ( Exception e ) { e.printStackTrace(); }
        return ResponseEntity.ok("update lead error"); 
         
     }
     @PostMapping("/update-ticket/{idTicket}/{amount}")
-    public ResponseEntity<String> updateTicket(@PathVariable int idTicket , @PathVariable double amount ) {
+    public ResponseEntity<String> updateTicket(@PathVariable int idTicket , @PathVariable String amount ) {
        try { 
             System.out.println("idTecket : "  + idTicket ) ; 
             System.out.println("amount : "  + amount ) ;
 
-            depenseService.updateTicket(idTicket, amount);
+            depenseService.updateTicket(idTicket , Double.valueOf(amount));
             return ResponseEntity.ok("update ticket successful"); 
        }catch ( Exception e ) { e.printStackTrace(); }
        return ResponseEntity.ok("update ticket error"); 
@@ -111,9 +111,9 @@ public class apiController {
     }
 
     @PostMapping("/update-taux/{taux}")
-    public ResponseEntity<String> updateTaux(@PathVariable double taux ) {
+    public ResponseEntity<String> updateTaux(@PathVariable String taux ) {
        try { 
-            tauxService.updateTaux(taux);
+            tauxService.updateTaux(Double.valueOf(taux));
             return ResponseEntity.ok("update taux successful"); 
        }catch ( Exception e ) { e.printStackTrace(); }
        return ResponseEntity.ok("update taux error"); 

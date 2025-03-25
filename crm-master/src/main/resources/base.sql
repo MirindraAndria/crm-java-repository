@@ -24,6 +24,16 @@ CREATE TABLE taux_alert(
     taux DECIMAL(15,2) NOT NULL
 ) ; 
 
+CREATE TABLE CustomerExpense (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customerEmail VARCHAR(255) NOT NULL,
+    subjectOrName VARCHAR(255) NOT NULL,
+    type VARCHAR(255) NOT NULL,
+    status VARCHAR(255) NOT NULL,
+    expense DECIMAL(10, 2) NOT NULL
+);
+
+
 INSERT INTO taux_alert (libelle, taux) VALUES 
 ('Alerte critique', 80.00) ; 
 
@@ -31,3 +41,4 @@ INSERT INTO taux_alert (libelle, taux) VALUES
 INSERT INTO depenseTicketLead (libelle, date_depense, amount, idTicket, idLead)
 VALUES
 ('Dépense liée au ticket A', '2025-03-23 10:00:00', 10000.00, 1, null ) ; 
+

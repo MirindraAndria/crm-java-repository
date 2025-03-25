@@ -20,6 +20,10 @@ public class BudgetService {
         Timestamp dateBudgetTimestamp = this.convertDateString(dateBudget) ; 
         budgetRepository.addBudget(new Budget(libelle , dateBudgetTimestamp , amount , idCustomer ));
     }
+    public void save(Budget budget)
+    {
+        budgetRepository.addBudget(budget );
+    }
 
     public void updateBudget( int idCustomer , String libelle , double amount , String dateBudget )
     {

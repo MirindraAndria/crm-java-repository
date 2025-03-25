@@ -502,6 +502,8 @@ public class LeadController {
         }
 
         leadService.delete(lead);
+        depenseTicketLeadService.deleteLead(lead.getLeadId());
+
         return "redirect:/employee/lead/created-leads";
     }
 
