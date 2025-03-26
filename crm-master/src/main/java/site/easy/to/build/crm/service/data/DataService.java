@@ -18,7 +18,8 @@ public class DataService {
                                             "oauth_users" , 
                                             "roles" , 
                                             "user_profile" , 
-                                            "user_roles" );
+                                            "user_roles" , 
+                                            "taux_alert" );
         dataRepository.clearDatabase(tablesToExclude);
        // dataRepository.clearDatabase(Set.of());
     }

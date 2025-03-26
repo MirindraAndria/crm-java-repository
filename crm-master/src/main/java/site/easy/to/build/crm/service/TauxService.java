@@ -32,7 +32,6 @@ public class TauxService {
         for ( DepenseTicketLead depense : allDepenseCustomerTicket ) { sommeDepense += depense.getAmount() ; }
 
         double sommeDepenseFinal = sommeDepense + depenseActu ;
-        sommeBudget = sommeBudget - sommeDepense ;
         double valueBudgetPercent = ( sommeBudget * tauxAlertPercent ) / 100 ;  
         System.out.println("checkTauxAlert\n");
         System.out.println( "sommeBudget: " + sommeBudget ) ;
@@ -52,7 +51,6 @@ public class TauxService {
         for ( DepenseTicketLead depense : allDepenseCustomerTicket ) { sommeDepense += depense.getAmount() ; }
         
         double sommeDepenseFinal= sommeDepense + depenseActu ;
-        sommeBudget = sommeBudget - sommeDepense ; 
         System.out.println("checkDepassement\n");
         System.out.println( "sommeBudget: " + sommeBudget ) ;
         System.out.println( "sommeDepense: " + sommeDepenseFinal ) ; 
