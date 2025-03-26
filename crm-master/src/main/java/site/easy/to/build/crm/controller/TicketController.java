@@ -195,7 +195,7 @@ public class TicketController {
         List<Budget> allBudget = budgetService.getAll( customerId) ; 
         double taux_percent = tauxService.getTauxAlert().getTaux(); 
         String alert =  tauxService.checkTauxAlert(taux_percent , allBudget , allDepenseLead, allDepenseTicket , amount);
-        String depassement = tauxService.checkDepassement(allBudget, allDepenseLead, allDepenseTicket ,taux_percent) ; 
+        String depassement = tauxService.checkDepassement(allBudget, allDepenseLead, allDepenseTicket , amount) ; 
         
         double sommeBudget = 0 ; 
         for ( Budget budget : allBudget) { sommeBudget += budget.getAmount() ; }
