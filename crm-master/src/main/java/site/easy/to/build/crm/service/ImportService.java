@@ -51,7 +51,7 @@ public class ImportService {
 
     public void importCsvCustomer(String csvFile , User user) {
         try {
-            // Définir un parser avec le séparateur ';'
+            // Définir un parser avec le séparateur ';'Exception {
             CSVParser parser = new CSVParserBuilder().withSeparator('~').build();
             // Construire le CSVReader avec ce parser
             CSVReader reader = new CSVReaderBuilder(new FileReader(csvFile))
@@ -102,7 +102,7 @@ public class ImportService {
                 budget.setLibelle("import budget ");
                 budget.setDateBudget(timestamp);
                 budget.setAmount( replaceSyntax(line[1]) , String.valueOf(lineNumber) );
-                if ( customerService.findByEmail(line[0]) == null ) { 
+                if ( customerService.findByEmail(line[0].trim()) == null ) { 
                     throw new Exception("error line : " + lineNumber + " customer email not foud : " + line[0]) ;
                 }
                 budget.setIdCustomer( customerService.findByEmail( line[0]).getCustomerId() ) ; 

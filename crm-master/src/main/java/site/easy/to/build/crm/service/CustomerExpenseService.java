@@ -53,16 +53,16 @@ public class CustomerExpenseService {
              allData.remove(0);
              int lineNumber = 1 ; 
              List<CustomerExpense> customerTicketLead  = new ArrayList<CustomerExpense>(); 
-             List<CustomerExpense> customerTicketLead2  = customerExpRepo.getAll() ; 
+            //  List<CustomerExpense> customerTicketLead2  = customerExpRepo.getAll() ; 
              
              for (String[] line : allData) {
                 CustomerExpense customerExpense = new CustomerExpense() ; 
-                if ( customerService.findByEmail(line[0]) == null ) { 
+                if ( customerService.findByEmail(line[0].trim()) == null ) { 
                     throw new Exception("error line : " + lineNumber + " customer email not foud : " + line[0]) ;
                 }
                 customerExpense.setCustomerEmail(line[0]);
                 customerExpense.setSubjectOrName(line[1]);
-                customerExpense.setType(line[2]);
+                customerExpense.setType(line[2] , String.valueOf(lineNumber));
                 customerExpense.setStatus(line[3], String.valueOf(lineNumber));
                 customerExpense.setExpense( this.replaceSyntax(line[4]), String.valueOf(lineNumber));
                 lineNumber ++ ;  

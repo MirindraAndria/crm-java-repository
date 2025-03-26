@@ -47,9 +47,18 @@ public class CustomerExpense {
         public String getType() {
             return type;
         }
-    
         public void setType(String type) {
             this.type = type;
+        }
+
+        public void setType(String type , String line ) throws Exception {
+            List<String> statusTicket = Arrays.asList(
+                "ticket", "lead" );
+            String newType = type.toLowerCase().trim() ; 
+            if (!statusTicket.contains(newType) ) {
+                throw new Exception("error line: " + line + " invalid type: " + type);
+            }
+            this.type = newType;
         }
     
         public String getStatus() {
@@ -60,8 +69,7 @@ public class CustomerExpense {
         }
         public void setStatus(String status , String line ) throws Exception { 
             this.checkStatus(status, line);
-            this.status = status;
-
+            this.status = status.toLowerCase().trim() ; 
         }
     
         public double getExpense() {
@@ -84,7 +92,7 @@ public class CustomerExpense {
         
 
         public void checkStatus(String status , String line)throws Exception {  
-            List<String> statusTicket = Arrays.asList(
+            List<String> statusTicketLead = Arrays.asList(
                 "open", 
                 "assigned", 
                 "on-hold", 
@@ -94,15 +102,18 @@ public class CustomerExpense {
                 "reopened", 
                 "pending-customer-response", 
                 "escalated", 
-                "archived"
-            );
-            List<String> statusLead = Arrays.asList(
-                "meeting-to-schedule", 
+                "archived" , 
+                "meeting-to-schedule",
                 "assign-to-sales", 
                 "archived", 
                 "success"
             );
-            if (!statusTicket.contains(status) && !statusLead.contains(status)) {
+            String newStatus = status.toLowerCase().trim() ; 
+            // if (!statusTicket.contains(newStatus) && !statusLead.contains(newStatus)) {
+            //     throw new Exception("error line: " + line + " invalid status: " + status);
+            // }
+            System.out.println("new Status : "  + newStatus);
+            if (!statusTicketLead.contains(newStatus)) {
                 throw new Exception("error line: " + line + " invalid status: " + status);
             }
         }
